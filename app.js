@@ -546,7 +546,7 @@ const APP_VERSION = "v4";
         <p class="hint">Progress saves on this device only. No accounts, no ads, no tracking.</p>
         <div class="btnrow">
           <button class="navbtn" data-nav="home">⬅ Back to Logan</button>
-          <p class="tiny">Logan's Reads v4</p>
+          <p class="tiny">Logan's Reads v5</p>
           <button class="navbtn danger" id="resetBtn">Reset progress</button>
         </div>
       </div>`;
