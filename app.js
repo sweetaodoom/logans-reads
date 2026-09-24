@@ -1,6 +1,7 @@
 /* Logan's Reads — app logic (v1) */
 (function () {
   "use strict";
+const APP_VERSION = "v3";
   const { PHONEMES, SOUNDS, FAMILIES, SIGHT, SENTENCES, STORIES, UNLOCKS, WORD_EMOJI } = window.LRData || {};
 
   /* ---------- progress store ---------- */
@@ -545,6 +546,7 @@
         <p class="hint">Progress saves on this device only. No accounts, no ads, no tracking.</p>
         <div class="btnrow">
           <button class="navbtn" data-nav="home">⬅ Back to Logan</button>
+          <p class="tiny">Logan's Reads v3</p>
           <button class="navbtn danger" id="resetBtn">Reset progress</button>
         </div>
       </div>`;
@@ -577,6 +579,9 @@
     });
   }
 
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("controllerchange", () => window.location.reload());
+  }
   document.addEventListener("DOMContentLoaded", () => {
     /* unlock audio on first touch (iOS Safari) */
     const unlock = () => {

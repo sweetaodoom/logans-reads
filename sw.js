@@ -1,5 +1,5 @@
 /* Logan's Reads service worker — cache-first app shell (v1) */
-const CACHE = "logans-reads-v2";
+const CACHE = "logans-reads-v3";
 const ASSETS = [
   "./", "./index.html", "./styles.css", "./data.js", "./app.js",
   "./manifest.webmanifest",
@@ -106,7 +106,7 @@ const ASSETS = [
   "./audio/w_win.mp3"
 ];
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS.map((u) => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (e) => {
   e.waitUntil(
