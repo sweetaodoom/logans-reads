@@ -27,24 +27,30 @@
   const d = store.data;
   const stars = () => d.stars;
 
-  /* ---------- audio ---------- */
-  let voice = null;
-  function pickVoice() {
+  /* ---------- audio: pre-recorded natural voice clips ---------- */
+  const AUDIO_BASE = "audio/";
+  const audioCache = {};
+  let audioUnlocked = false;
+  function clip(name) {
+    if (!audioCache[name]) {
+      const a = new Audio(AUDIO_BASE + name + ".mp3");
+      a.preload = "auto";
+      audioCache[name] = a;
+    }
+    return audioCache[name];
+  }
+  function unlockAudio() {
+    if (audioUnlocked) return; audioUnlocked = true;
     try {
-      const vs = speechSynthesis.getVoices();
-      voice = vs.find(v => v.lang && v.lang.toLowerCase().startsWith("en-us") && /female|samantha|zira|google us english/i.test(v.name))
-        || vs.find(v => v.lang && v.lang.toLowerCase().startsWith("en-us"))
-        || vs.find(v => v.lang && v.lang.toLowerCase().startsWith("en"))
-        || null;
-    } catch (e) { voice = null; }
+      const a = clip("ui_yes"); a.volume = 0;
+      const p = a.play();
+      if (p) p.then(() => { try { a.pause(); a.currentTime = 0; } catch (e) {} a.volume = 1; }).catch(() => { a.volume = 1; });
+    } catch (e) {}
   }
-  if ("speechSynthesis" in window) {
-    pickVoice();
-    if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = pickVoice;
-  }
+  document.addEventListener("pointerdown", unlockAudio, { once: true });
 
-  function say(text, opts) {
-    opts = opts || {};
+  /* speechSynthesis fallback, only if a clip file is missing */
+  function synthSpeak(text, rate) {
     return new Promise((resolve) => {
       if (!("speechSynthesis" in window)) { resolve(); return; }
       let done = false;
@@ -52,19 +58,43 @@
       try {
         speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
-        if (voice) u.voice = voice;
-        u.rate = opts.rate || 0.95;
-        u.pitch = opts.pitch || 1.1;
+        u.rate = rate || 0.95; u.pitch = 1.1;
         u.onend = fin; u.onerror = fin;
         speechSynthesis.speak(u);
-        setTimeout(fin, 6000); /* safety net */
+        setTimeout(fin, 6000);
       } catch (e) { fin(); }
     });
   }
-  const sayPhoneme = (ch) => say(PHONEMES[ch] || ch, { rate: 0.9 });
+  /* play a clip; fall back to synthesized fallbackText on error */
+  function sayClip(name, fallbackText, rate) {
+    unlockAudio();
+    return new Promise((resolve) => {
+      let settled = false;
+      const a = clip(name);
+      const cleanup = () => { a.removeEventListener("ended", done); a.removeEventListener("error", onErr); };
+      const done = () => { if (settled) return; settled = true; cleanup(); resolve(); };
+      const onErr = () => { if (settled) return; settled = true; cleanup(); synthSpeak(fallbackText, rate).then(resolve); };
+      a.addEventListener("ended", done);
+      a.addEventListener("error", onErr);
+      try { a.currentTime = 0; } catch (e) {}
+      const p = a.play();
+      if (p) p.catch(onErr);
+      setTimeout(done, 6000); /* safety net */
+    });
+  }
+  const say = (t) => synthSpeak(t); /* generic fallback */
+
+  const PHONEME_CLIP = { a:"ph_a", b:"ph_b", c:"ph_c", d:"ph_d", e:"ph_e", f:"ph_f",
+    g:"ph_g", h:"ph_h", i:"ph_i", j:"ph_j", k:"ph_c", l:"ph_l", m:"ph_m",
+    n:"ph_n", o:"ph_o", p:"ph_p", r:"ph_r", s:"ph_s", t:"ph_t", u:"ph_u", w:"ph_w" };
+  const sayPhoneme = (ch) => sayClip(PHONEME_CLIP[ch] || "ph_m", PHONEMES[ch] || ch, 0.9);
+  const wordClip = (w) => w === "3" ? "w_three" : "w_" + String(w).toLowerCase().replace(/[^a-z]/g, "");
+  const sayWord = (w) => sayClip(wordClip(w), w, 0.9);
+  const PRAISE_CLIPS = ["ui_yes", "ui_great", "ui_didit", "ui_awesome", "ui_superstar"];
+  const PRAISE_TEXT = ["Yes!", "Great reading!", "You did it!", "Awesome!", "Super star reading!"];
   const praise = () => {
-    const lines = ["Great reading!", "You did it!", "Awesome!", "Super star reading!"];
-    return say(lines[Math.floor(Math.random() * lines.length)]);
+    const i = Math.floor(Math.random() * PRAISE_CLIPS.length);
+    return sayClip(PRAISE_CLIPS[i], PRAISE_TEXT[i], 0.95);
   };
 
   const wait = (ms) => new Promise(r => setTimeout(r, ms));
@@ -149,7 +179,7 @@
         <button class="grownups" data-nav="parents">👪 Grown-ups</button>
       </div>
       <div id="celebrate"></div>`;
-    $("#helloBtn").addEventListener("click", () => say("Hi Logan! Ready to read?"));
+    $("#helloBtn").addEventListener("click", () => sayClip("ui_hi", "Hi Logan! Ready to read?"));
   }
 
   /* ---------- LEVEL 1: SOUNDS ---------- */
@@ -178,7 +208,7 @@
         <div class="soundword">${info.word}</div>`;
       await sayPhoneme(ch);
       await wait(250);
-      await say(info.word, { rate: 0.9 });
+      await sayWord(info.word);
       if (!d.sounds[ch]) { d.sounds[ch] = 1; }
       else if (d.sounds[ch] < 3) { d.sounds[ch]++; }
       if (d.sounds[ch] === 3) starBurst(1);
@@ -257,7 +287,7 @@
       /* bring letters together + say whole word */
       $("#letters").classList.add("together");
       await wait(450);
-      await say(word, { rate: 0.85 });
+      await sayWord(word);
       /* reveal picture + celebrate */
       const pic = $("#wordpic");
       $("#wordemoji").textContent = emoji;
@@ -284,7 +314,7 @@
       } else {
         $("#letters").classList.add("together");
         await wait(300);
-        await say(word, { rate: 0.85 });  /* whole word */
+        await sayWord(word);  /* whole word */
         $("#letters").classList.remove("together");
         /* helpLevel stays > 0: he needed help with this word */
       }
@@ -338,7 +368,7 @@
       btn.disabled = true;
       for (const ch of word) { await sayPhoneme(ch); await wait(200); }
       await wait(200);
-      await say(word, { rate: 0.85 });
+      await sayWord(word);
       btn.disabled = false;
     });
 
@@ -350,7 +380,7 @@
         answered = true;
         btn.classList.add("correct");
         fb.innerHTML = `<p class="good">Yes! ${word.toUpperCase()}! 🎉</p>`;
-        await say("Yes! " + word + "!");
+        await sayClip("ui_yes", "Yes!"); await sayWord(word);
         await praise();
         starBurst(1);
         const w = d.words[word];
@@ -362,7 +392,7 @@
         btn.classList.add("wrong");
         setTimeout(() => btn.classList.remove("wrong"), 700);
         fb.innerHTML = `<p class="tryagain">Try again! 💛 Tap 🔊 if you need help.</p>`;
-        await say("Try again!");
+        await sayClip("ui_tryagain", "Try again!");
         setTimeout(() => { if (!answered) fb.innerHTML = ""; }, 2500);
       }
     }));
@@ -407,13 +437,13 @@
       </div><div id="celebrate"></div>`;
     $$(".wordbtn").forEach(b => b.addEventListener("click", async () => {
       b.classList.add("lit");
-      await say(b.dataset.w, { rate: 0.85 });
+      await sayWord(b.dataset.w);
       b.classList.remove("lit");
     }));
     $("#readBtn").addEventListener("click", async () => {
       const btn = $("#readBtn");
       btn.disabled = true;
-      await say(s.text, { rate: 0.9 });
+      await sayClip("sen_" + i, s.text, 0.95);
       btn.disabled = false;
       d.sentencesRead++;
       starBurst(1);
@@ -441,10 +471,10 @@
         </div><div id="celebrate"></div>`;
       $$(".wordbtn").forEach(b => b.addEventListener("click", async () => {
         b.classList.add("lit");
-        await say(b.dataset.w, { rate: 0.85 });
+        await sayWord(b.dataset.w);
         b.classList.remove("lit");
       }));
-      $("#readBtn").addEventListener("click", () => say(p.text, { rate: 0.9 }));
+      $("#readBtn").addEventListener("click", () => sayClip("p_" + id + "_" + page, p.text, 0.95));
       const back = $("#backPg");
       if (back) back.addEventListener("click", () => showStory(id, page - 1));
       $("#nextPg").addEventListener("click", () => showStory(id, page + 1));
@@ -469,7 +499,7 @@
         </div>
         <div class="feedback" id="feedback"></div>
       </div><div id="celebrate"></div>`;
-    say(q.text, { rate: 0.9 });
+    sayClip("q_" + id, q.text, 0.95);
     $$(".qbtn").forEach(btn => btn.addEventListener("click", async () => {
       if (answered) return;
       const fb = $("#feedback");
@@ -477,7 +507,7 @@
         answered = true;
         btn.classList.add("correct");
         fb.innerHTML = `<p class="good">Yes! Great reading, Logan! 🎉</p>`;
-        await say("Yes! Great reading, Logan!");
+        await sayClip("ui_great", "Yes! Great reading, Logan!");
         starBurst(2);
         d.stories[id] = (d.stories[id] || 0) + 1;
         store.save();
@@ -487,7 +517,7 @@
         btn.classList.add("wrong");
         setTimeout(() => btn.classList.remove("wrong"), 700);
         fb.innerHTML = `<p class="tryagain">Try again! 💛</p>`;
-        await say("Try again!");
+        await sayClip("ui_tryagain", "Try again!");
       }
     }));
   }
@@ -542,7 +572,7 @@
       if (t.dataset.lock) {
         const key = t.dataset.lock;
         const nm = t.querySelector(".cardname");
-        say(`${nm ? nm.textContent : "That"} is locked. Earn ${UNLOCKS[key]} stars to open it!`);
+        sayClip("ui_locked", "That is locked. Earn " + UNLOCKS[key] + " stars to open it!");
       }
     });
   }

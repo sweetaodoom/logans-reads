@@ -1,0 +1,101 @@
+# file<TAB>text  (spoken form; phoneme tricks for isolated sounds)
+ph_b.mp3	buh
+ph_c.mp3	kuh
+ph_d.mp3	duh
+ph_f.mp3	fff
+ph_g.mp3	guh
+ph_h.mp3	huh
+ph_j.mp3	juh
+ph_l.mp3	lll
+ph_m.mp3	mmm
+ph_n.mp3	nnn
+ph_p.mp3	puh
+ph_r.mp3	rrr
+ph_s.mp3	sss
+ph_t.mp3	tuh
+ph_w.mp3	wuh
+vow_a_src.mp3	at
+vow_e_src.mp3	ed
+vow_i_src.mp3	it
+vow_o_src.mp3	ot
+vow_u_src.mp3	up
+w_cat.mp3	cat
+w_hat.mp3	hat
+w_mat.mp3	mat
+w_sat.mp3	sat
+w_bat.mp3	bat
+w_rat.mp3	rat
+w_man.mp3	man
+w_fan.mp3	fan
+w_can.mp3	can
+w_pan.mp3	pan
+w_map.mp3	map
+w_cap.mp3	cap
+w_tap.mp3	tap
+w_nap.mp3	nap
+w_pin.mp3	pin
+w_fin.mp3	fin
+w_win.mp3	win
+w_sit.mp3	sit
+w_hit.mp3	hit
+w_fit.mp3	fit
+w_pig.mp3	pig
+w_dig.mp3	dig
+w_big.mp3	big
+w_dog.mp3	dog
+w_log.mp3	log
+w_fog.mp3	fog
+w_hop.mp3	hop
+w_top.mp3	top
+w_mop.mp3	mop
+w_sun.mp3	sun
+w_run.mp3	run
+w_fun.mp3	fun
+w_pet.mp3	pet
+w_net.mp3	net
+w_jet.mp3	jet
+w_a.mp3	a
+w_the.mp3	the
+w_is.mp3	is
+w_in.mp3	in
+w_it.mp3	it
+w_and.mp3	and
+w_see.mp3	see
+w_me.mp3	me
+w_my.mp3	my
+w_we.mp3	we
+w_on.mp3	on
+w_logan.mp3	Logan
+w_has.mp3	has
+w_sam.mp3	Sam
+w_red.mp3	red
+w_pat.mp3	pat
+w_digs.mp3	digs
+w_sand.mp3	sand
+w_three.mp3	three
+ui_yes.mp3	Yes!
+ui_great.mp3	Great reading!
+ui_didit.mp3	You did it!
+ui_awesome.mp3	Awesome!
+ui_superstar.mp3	Super star reading!
+ui_tryagain.mp3	Try again!
+ui_hi.mp3	Hi Logan! Ready to read?
+ui_locked.mp3	That activity is still locked. Keep earning stars!
+sen_0.mp3	The cat can run.
+sen_1.mp3	The dog is big.
+sen_2.mp3	A pig can sit.
+sen_3.mp3	The cat is on the mat.
+sen_4.mp3	Logan has three fish.
+sen_5.mp3	A fish can swim.
+sen_6.mp3	We see the sun.
+sen_7.mp3	Sam has a red cap.
+p_sam-cat_0.mp3	Sam has a cat.
+p_sam-cat_1.mp3	The cat is on a mat.
+p_sam-cat_2.mp3	Sam can pat the cat.
+p_sam-cat_3.mp3	The cat can nap.
+p_sea-fun_0.mp3	Logan has three fish.
+p_sea-fun_1.mp3	The fish can swim.
+p_sea-fun_2.mp3	A crab digs in the sand.
+p_sea-fun_3.mp3	The crab is fun.
+q_sam-cat.mp3	Where is the cat?
+q_sea-fun.mp3	Who digs in the sand?
