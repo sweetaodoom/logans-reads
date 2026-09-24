@@ -1,5 +1,5 @@
 /* Logan's Reads service worker — cache-first app shell (v1) */
-const CACHE = "logans-reads-v3";
+const CACHE = "logans-reads-v4";
 const ASSETS = [
   "./", "./index.html", "./styles.css", "./data.js", "./app.js",
   "./manifest.webmanifest",
